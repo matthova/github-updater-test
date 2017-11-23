@@ -6,10 +6,39 @@ const BrowserWindow = electron.BrowserWindow
 
 const path = require('path')
 const url = require('url')
+const GhReleases = require('electron-gh-releases')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+
+function checkForUpdates() {
+  let options = {
+    repo: 'matthova/github-updater-test',
+    currentVersion: app.getVersion()
+  }
+
+  const updater = new GhReleases(options)
+
+  // Check for updates
+  // `status` returns true if there is a new update available
+  updater.check((err, status) => {
+    console.log('updater check', err, status);
+    if (!err && status) {
+      // Download the update
+      updater.download()
+    }
+  })
+
+  // When an update has been downloaded
+  updater.on('update-downloaded', (info) => {
+    // Restart the app and install the update
+    updater.install()
+  })
+
+  // Access electrons autoUpdater
+  updater.autoUpdater
+}
 
 function createWindow () {
   // Create the browser window.
@@ -37,7 +66,10 @@ function createWindow () {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow)
+app.on('ready', () => {
+  createWindow()
+  checkForUpdates()
+})
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {

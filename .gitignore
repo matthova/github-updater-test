@@ -1,1 +1,11 @@
+dist
+build-assets
 node_modules
+
+# Certificates
+*.spc
+*.pvk
+*.p12
+*.cer
+*.crt
+*.pem
